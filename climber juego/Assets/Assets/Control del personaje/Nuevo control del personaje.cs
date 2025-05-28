@@ -5,11 +5,11 @@ public class Nuevocontroldelpersonaje : MonoBehaviour
 
     [Header("Movimiento")]
 
-    public float Walkspeed = 4f;
+    public float Walkspeed = 2f;
     public float SprintSpeed = 6f;
-    public float jumpHeight = 2f;
+    public float jumpHeight = 1f;
     public float rotationSpeed = 10f;
-    public float mouseSensitivity = 1f;
+    public float mouseSensitivity = 50f;
     public float gravity = -20f;
 
     [Header("Referenciacion")]
@@ -110,5 +110,5 @@ public class Nuevocontroldelpersonaje : MonoBehaviour
         animator?.SetFloat("VerticalSpeed", Velocity.y);
     }
 
-    
+   
 }
