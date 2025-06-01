@@ -1,56 +1,46 @@
 using UnityEngine;
 
-public class CameraController : MonoBehaviour
+public class VerticalCameraScroll : MonoBehaviour
 {
-    public Transform target;            // El objetivo que la cámara sigue (tu personaje)
-    public float distance = 5.0f;       // Distancia inicial desde el objetivo
-    public float xSpeed = 500.0f;       // Sensibilidad de rotación horizontal
-    public float ySpeed = 500.0f;       // Sensibilidad de rotación vertical
+    [Header("Velocidad de subida (usa valores bajos como 0.5 - 2.0)")]
+    public float scrollSpeed = 0.5f;
 
-    public float yMinLimit = -20f;      // Límite inferior de rotación vertical
-    public float yMaxLimit = 80f;       // Límite superior de rotación vertical
+    [Header("Jugador y lógica de muerte")]
+    public Transform player;
+    public float deathOffset = -6f;
 
-    public float distanceMin = 2f;      // Zoom mínimo
-    public float distanceMax = 10f;     // Zoom máximo
+    [Header("Altura máxima de la cámara")]
+    public float maxY = 3f;
 
-    private float x = 0.0f;             // Rotación horizontal acumulada
-    private float y = 0.0f;             // Rotación vertical acumulada
+    private float lockedX;
+    private float lockedZ;
 
     void Start()
     {
-        Vector3 angles = transform.eulerAngles;
-        x = angles.y;
-        y = angles.x;
-
-        // Bloquea el cursor para una experiencia inmersiva
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        // Guardamos posición X y Z para mantenerlas fijas
+        lockedX = transform.position.x;
+        lockedZ = transform.position.z;
     }
 
-    void LateUpdate()
+    void Update()
     {
-        if (target)
+        // Movimiento vertical controlado hasta llegar a maxY
+        if (transform.position.y < maxY)
         {
-            // Movimiento del mouse
-            x += Input.GetAxis("Mouse X") * xSpeed * Time.deltaTime;
-            y -= Input.GetAxis("Mouse Y") * ySpeed * Time.deltaTime;
+            float newY = Mathf.Min(transform.position.y + scrollSpeed * Time.deltaTime, maxY);
+            transform.position = new Vector3(lockedX, newY, lockedZ);
+        }
+        else
+        {
+            // Al llegar a maxY, fijamos la posición
+            transform.position = new Vector3(lockedX, maxY, lockedZ);
+        }
 
-            // Limita la rotación vertical
-            y = Mathf.Clamp(y, yMinLimit, yMaxLimit);
-
-            // Zoom con la rueda del mouse
-            distance -= Input.GetAxis("Mouse ScrollWheel") * 2;
-            distance = Mathf.Clamp(distance, distanceMin, distanceMax);
-
-            // Calcula la nueva rotación
-            Quaternion rotation = Quaternion.Euler(y, x, 0);
-
-            // Calcula la nueva posición
-            Vector3 negDistance = new Vector3(0.0f, 0.0f, -distance);
-            Vector3 position = rotation * negDistance + target.position;
-
-            transform.rotation = rotation;
-            transform.position = position;
+        // Verificar si el jugador queda abajo
+        if (player != null && player.position.y < transform.position.y + deathOffset)
+        {
+            Debug.Log("¡El jugador ha muerto por quedarse atrás!");
+            // Aquí puedes reiniciar nivel o mostrar pantalla de derrota
         }
     }
 }
